@@ -1,0 +1,7 @@
+package com.connect.social_connect.util.error;
+
+public class IdInvalidException extends Exception {
+    public IdInvalidException(String message) {
+        super(message);
+    }
+}

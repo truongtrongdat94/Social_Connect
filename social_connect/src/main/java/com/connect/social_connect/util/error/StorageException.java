@@ -1,0 +1,7 @@
+package com.connect.social_connect.util.error;
+
+public class StorageException extends Exception {
+    public StorageException(String message) {
+        super(message);
+    }
+}
