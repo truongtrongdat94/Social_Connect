@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -107,5 +108,54 @@ public class GlobalException {
         res.setMessage(ex.getMessage());
         res.setError("404 Not Found. URL may not exist...");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(res);
+    }
+
+    // OTP Exception Handlers - Requirements: 2.2, 2.3, 2.5, 3.3
+
+    @ExceptionHandler(OtpInvalidException.class)
+    public ResponseEntity<RestResponse<Object>> handleOtpInvalidException(OtpInvalidException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setError("OTP_INVALID");
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity<RestResponse<Object>> handleOtpExpiredException(OtpExpiredException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setError("OTP_EXPIRED");
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(OtpLockedException.class)
+    public ResponseEntity<RestResponse<Object>> handleOtpLockedException(OtpLockedException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
+        res.setError("OTP_LOCKED");
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(res);
+    }
+
+    @ExceptionHandler(OtpResendLimitException.class)
+    public ResponseEntity<RestResponse<Object>> handleOtpResendLimitException(OtpResendLimitException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
+        res.setError("OTP_RESEND_LIMIT");
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(res);
+    }
+
+    // OAuth2 Exception Handlers - Requirements: 4.6, 6.4
+
+    @ExceptionHandler(OAuth2AuthenticationException.class)
+    public ResponseEntity<RestResponse<Object>> handleOAuth2AuthenticationException(OAuth2AuthenticationException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        res.setError("OAUTH2_FAILED");
+        res.setMessage("Đăng nhập Google thất bại: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
     }
 }
