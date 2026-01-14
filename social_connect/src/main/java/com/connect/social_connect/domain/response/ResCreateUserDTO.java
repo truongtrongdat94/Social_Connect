@@ -12,5 +12,7 @@ public class ResCreateUserDTO {
     private String username;
     private String email;
     private String displayName;
+    private Boolean isEmailVerified;
+    private String message;
     private Instant createdAt;
 }

@@ -9,6 +9,7 @@ import com.connect.social_connect.domain.response.ResCreateUserDTO;
 import com.connect.social_connect.domain.response.ResLoginDTO;
 import com.connect.social_connect.repository.RoleRepository;
 import com.connect.social_connect.repository.UserRepository;
+import com.connect.social_connect.util.constant.AuthProviderEnum;
 
 @Service
 public class UserService {
@@ -63,6 +64,7 @@ public class UserService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setDisplayName(user.getDisplayName());
+        dto.setIsEmailVerified(user.getIsEmailVerified());
         dto.setCreatedAt(user.getCreatedAt());
         return dto;
     }
@@ -106,5 +108,54 @@ public class UserService {
         }
 
         return userLogin;
+    }
+
+     //Activate user by setting isEmailVerified to true
+    public User activateUser(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.setIsEmailVerified(true);
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    /**
+     * Find existing user by email or create new user with Google OAuth2 data.
+     * Google users are automatically verified (isEmailVerified = true).
+     *
+     * Requirements: 4.3, 4.4, 8.6
+     *
+     * @param email Google account email
+     * @param name Google account display name
+     * @param picture Google account avatar URL
+     * @return User entity (existing or newly created)
+     */
+    public User findOrCreateGoogleUser(String email, String name, String picture) {
+        User existingUser = userRepository.findByEmail(email);
+
+        if (existingUser != null) {
+            // Update avatar if user doesn't have one
+            if (existingUser.getAvatarUrl() == null && picture != null) {
+                existingUser.setAvatarUrl(picture);
+                return userRepository.save(existingUser);
+            }
+            return existingUser;
+        }
+
+        // Create new user with Google data
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setUsername(email); // Use email as username for Google users
+        newUser.setDisplayName(name != null ? name : email.split("@")[0]);
+        newUser.setAvatarUrl(picture);
+        newUser.setAuthProvider(AuthProviderEnum.GOOGLE);
+        newUser.setIsEmailVerified(true); // Google users are automatically verified
+
+        // Assign default USER role
+        Role userRole = roleRepository.findByName("USER");
+        newUser.setRole(userRole);
+
+        return userRepository.save(newUser);
     }
 }

@@ -36,6 +36,7 @@ public class User {
 
     // Basic fields
     @NotBlank(message = "username không được để trống")
+    @Column(unique = true)
     private String username;
 
     @NotBlank(message = "email không được để trống")
@@ -56,6 +57,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private AuthProviderEnum authProvider;
+
+    @Column(nullable = false)
+    private Boolean isEmailVerified = false;
 
     // Audit fields
     private Instant createdAt;
