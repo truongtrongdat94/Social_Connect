@@ -36,7 +36,6 @@ public class User {
 
     // Basic fields
     @NotBlank(message = "username không được để trống")
-    @Column(unique = true)
     private String username;
 
     @NotBlank(message = "email không được để trống")
