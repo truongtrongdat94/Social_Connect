@@ -2,19 +2,16 @@ package com.connect.social_connect.controller;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.connect.social_connect.domain.User;
-import com.connect.social_connect.domain.request.ReqCreateUserDTO;
 import com.connect.social_connect.domain.request.ReqUpdateProfileDTO;
 import com.connect.social_connect.domain.request.ReqUpdateUserRoleDTO;
 import com.connect.social_connect.domain.response.ResPublicProfileDTO;
@@ -39,12 +36,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ==================== User Profile Endpoints (Task 2.5) ====================
+    //User Profile Endpoints
 
-    /**
-     * GET /api/v1/users/me - Get current user's full profile
-     * Requirements: 1.1
-     */
+     //Get current user's full profile
     @GetMapping("/me")
     @ApiMessage("Lấy thông tin profile thành công")
     public ResponseEntity<ResUserProfileDTO> getCurrentUserProfile() throws IdInvalidException {
@@ -60,10 +54,7 @@ public class UserController {
     }
 
 
-    /**
-     * PUT /api/v1/users/me - Update current user's profile
-     * Requirements: 2.1
-     */
+     //Update current user's profile
     @PutMapping("/me")
     @ApiMessage("Cập nhật profile thành công")
     public ResponseEntity<ResUserProfileDTO> updateCurrentUserProfile(
@@ -80,10 +71,7 @@ public class UserController {
         return ResponseEntity.ok(userService.convertToResUserProfileDTO(updatedUser));
     }
 
-    /**
-     * GET /api/v1/users/{id} - Get public profile by user id
-     * Requirements: 7.1
-     */
+     // Get public profile by user id
     @GetMapping("/{id}")
     @ApiMessage("Lấy thông tin public profile thành công")
     public ResponseEntity<ResPublicProfileDTO> getPublicProfile(@PathVariable Long id) throws IdInvalidException {
@@ -95,12 +83,9 @@ public class UserController {
         return ResponseEntity.ok(userService.convertToResPublicProfileDTO(user));
     }
 
-    // ==================== Admin Endpoints (Task 2.6) ====================
+    //Admin Endpoints
 
-    /**
-     * GET /api/v1/users - Get paginated user list with filtering (Admin)
-     * Requirements: 3.1
-     */
+     //Get paginated user list with filtering (Admin)
     @GetMapping
     @ApiMessage("Lấy danh sách người dùng thành công")
     public ResponseEntity<ResultPaginationDTO> getAllUsers(
@@ -109,10 +94,7 @@ public class UserController {
         return ResponseEntity.ok(userService.fetchAllUsers(spec, pageable));
     }
 
-    /**
-     * GET /api/v1/users/{id}/admin - Get user details with role (Admin)
-     * Requirements: 3.2
-     */
+     //Get user details with role (Admin)
     @GetMapping("/{id}/admin")
     @ApiMessage("Lấy thông tin chi tiết người dùng thành công")
     public ResponseEntity<ResUserDTO> getUserByIdAdmin(@PathVariable Long id) throws IdInvalidException {
@@ -124,10 +106,7 @@ public class UserController {
         return ResponseEntity.ok(userService.convertToResUserDTO(user));
     }
 
-    /**
-     * PUT /api/v1/users/{id}/role - Update user's role (Admin)
-     * Requirements: 3.3
-     */
+     //Update user's role (Admin)
     @PutMapping("/{id}/role")
     @ApiMessage("Cập nhật role người dùng thành công")
     public ResponseEntity<ResUserDTO> updateUserRole(
@@ -137,10 +116,7 @@ public class UserController {
         return ResponseEntity.ok(userService.convertToResUserDTO(updatedUser));
     }
 
-    /**
-     * DELETE /api/v1/users/{id} - Delete user (Admin)
-     * Requirements: 3.4
-     */
+     //Delete user (Admin)
     @DeleteMapping("/{id}")
     @ApiMessage("Xóa người dùng thành công")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) throws IdInvalidException {
