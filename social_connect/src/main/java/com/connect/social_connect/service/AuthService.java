@@ -23,7 +23,7 @@ import com.nimbusds.jose.util.Base64;
 @Service
 public class AuthService {
 
-    public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
+    public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS256;
 
     @Value("${app.jwt.base64-secret}")
     private String jwtKey;

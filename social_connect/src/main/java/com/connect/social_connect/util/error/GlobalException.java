@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,14 +29,40 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 
-    @ExceptionHandler(value = { IdInvalidException.class, BadCredentialsException.class,
-            UsernameNotFoundException.class })
-    public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
+    @ExceptionHandler(value = IdInvalidException.class)
+    public ResponseEntity<RestResponse<Object>> handleIdInvalidException(IdInvalidException ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.BAD_REQUEST.value());
         res.setMessage(ex.getMessage());
         res.setError("Exception occurs...");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(value = BadCredentialsException.class)
+    public ResponseEntity<RestResponse<Object>> handleBadCredentialsException(BadCredentialsException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setMessage("Username/password không hợp lệ");
+        res.setError("Authentication Error");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(value = UsernameNotFoundException.class)
+    public ResponseEntity<RestResponse<Object>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        res.setMessage("Username/password không hợp lệ");
+        res.setError("Authentication Error");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(value = JwtException.class)
+    public ResponseEntity<RestResponse<Object>> handleJwtException(JwtException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        res.setMessage("Token không hợp lệ");
+        res.setError("Token Error");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
