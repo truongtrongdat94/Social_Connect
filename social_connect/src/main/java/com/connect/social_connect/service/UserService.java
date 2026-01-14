@@ -120,17 +120,7 @@ public class UserService {
         return null;
     }
 
-    /**
-     * Find existing user by email or create new user with Google OAuth2 data.
-     * Google users are automatically verified (isEmailVerified = true).
-     *
-     * Requirements: 4.3, 4.4, 8.6
-     *
-     * @param email Google account email
-     * @param name Google account display name
-     * @param picture Google account avatar URL
-     * @return User entity (existing or newly created)
-     */
+     //Find existing user by email or create new user with Google OAuth2 data.
     public User findOrCreateGoogleUser(String email, String name, String picture) {
         User existingUser = userRepository.findByEmail(email);
 
@@ -146,7 +136,7 @@ public class UserService {
         // Create new user with Google data
         User newUser = new User();
         newUser.setEmail(email);
-        newUser.setUsername(email); // Use email as username for Google users
+        newUser.setUsername(generateUniqueUsername(email));
         newUser.setDisplayName(name != null ? name : email.split("@")[0]);
         newUser.setAvatarUrl(picture);
         newUser.setAuthProvider(AuthProviderEnum.GOOGLE);
@@ -157,5 +147,22 @@ public class UserService {
         newUser.setRole(userRole);
 
         return userRepository.save(newUser);
+    }
+
+    /**
+     * Generate unique username from email.
+     * If base username exists, append number suffix.
+     */
+    private String generateUniqueUsername(String email) {
+        String baseUsername = email.split("@")[0].toLowerCase().replaceAll("[^a-z0-9]", "");
+        String username = baseUsername;
+        int suffix = 1;
+
+        while (userRepository.existsByUsername(username)) {
+            username = baseUsername + suffix;
+            suffix++;
+        }
+
+        return username;
     }
 }

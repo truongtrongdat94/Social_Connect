@@ -184,7 +184,28 @@ public class AuthController {
     @PostMapping("/login")
     @ApiMessage("Đăng nhập thành công")
     public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody ReqLoginDTO loginDTO,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws IdInvalidException {
+        // Get user from database first to perform pre-authentication checks
+        User currentUser = userService.handleGetUserByUsername(loginDTO.getUsername());
+
+        // Check if user exists
+        if (currentUser == null) {
+            throw new IdInvalidException("Email hoặc mật khẩu không đúng");
+        }
+
+        // Check if user is a Google-only user (authProvider = GOOGLE and no password set)
+        // Requirement 5.3: Return error if user has authProvider = GOOGLE and passwordHash = null
+        if (currentUser.getAuthProvider() == AuthProviderEnum.GOOGLE
+                && (currentUser.getPasswordHash() == null || currentUser.getPasswordHash().isEmpty())) {
+            throw new IdInvalidException("Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google.");
+        }
+
+        // Check if email is verified (Requirement 2.1)
+        // Reject login if isEmailVerified = false
+        if (!currentUser.getIsEmailVerified()) {
+            throw new IdInvalidException("Email chưa được xác thực. Vui lòng xác thực email trước khi đăng nhập.");
+        }
+
         // Authenticate with AuthenticationManager
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getUsername(), loginDTO.getPassword());
@@ -193,9 +214,6 @@ public class AuthController {
 
         // Set SecurityContext
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        // Get user from database
-        User currentUser = userService.handleGetUserByUsername(loginDTO.getUsername());
 
         // Build response DTO
         ResLoginDTO resLoginDTO = new ResLoginDTO();
