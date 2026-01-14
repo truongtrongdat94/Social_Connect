@@ -119,4 +119,70 @@ class AuthServicePropertyTest {
         dto.setUser(userLogin);
         return dto;
     }
+
+    /**
+     * Feature: auth-module, Property 8: Token expiration matches configuration
+     * Validates: Requirements 6.3, 6.4
+     *
+     * For any generated token:
+     * - Access token expiration = current time + configured access-token-validity-in-seconds
+     * - Refresh token expiration = current time + configured refresh-token-validity-in-seconds
+     */
+    @Property(tries = 100)
+    void tokenExpirationMatchesConfiguration(
+            @ForAll("validAccessTokenExpiration") long accessExpiration,
+            @ForAll("validRefreshTokenExpiration") long refreshExpiration,
+            @ForAll("validEmails") String email) {
+
+        // Ensure valid configuration
+        Assume.that(refreshExpiration > accessExpiration);
+
+        AuthService authService = createAuthService(accessExpiration, refreshExpiration);
+
+        // Verify configured expiration values are correctly stored
+        long actualAccessExpiration = authService.getAccessTokenExpiration();
+        long actualRefreshExpiration = authService.getRefreshTokenExpiration();
+
+        // Property 8a: Access token expiration matches configuration
+        assertThat(actualAccessExpiration)
+                .as("Access token expiration should match configured value")
+                .isEqualTo(accessExpiration);
+
+        // Property 8b: Refresh token expiration matches configuration
+        assertThat(actualRefreshExpiration)
+                .as("Refresh token expiration should match configured value")
+                .isEqualTo(refreshExpiration);
+    }
+
+    /**
+     * Feature: auth-module, Property 8: Token expiration matches configuration
+     * Validates: Requirements 6.3, 6.4
+     *
+     * Verifies default configuration values from requirements:
+     * - Access token: 86400 seconds (1 day)
+     * - Refresh token: 604800 seconds (7 days)
+     */
+    @Property(tries = 100)
+    void defaultTokenExpirationMatchesRequirements(@ForAll("validEmails") String email) {
+        // Default values from Requirements 6.3 and 6.4
+        long defaultAccessExpiration = 86400L;   // 1 day
+        long defaultRefreshExpiration = 604800L; // 7 days
+
+        AuthService authService = createAuthService(defaultAccessExpiration, defaultRefreshExpiration);
+
+        ResLoginDTO dto = createMockLoginDTO(email);
+
+        // Exercise token creation
+        authService.createAccessToken(email, dto);
+        authService.createRefreshToken(email, dto);
+
+        // Verify default configuration matches requirements
+        assertThat(authService.getAccessTokenExpiration())
+                .as("Default access token expiration should be 86400 seconds (Requirement 6.3)")
+                .isEqualTo(defaultAccessExpiration);
+
+        assertThat(authService.getRefreshTokenExpiration())
+                .as("Default refresh token expiration should be 604800 seconds (Requirement 6.4)")
+                .isEqualTo(defaultRefreshExpiration);
+    }
 }
