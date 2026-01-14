@@ -20,7 +20,6 @@ import com.connect.social_connect.domain.request.ReqLoginDTO;
 import com.connect.social_connect.domain.request.ReqRegisterDTO;
 import com.connect.social_connect.domain.request.ReqResendOtpDTO;
 import com.connect.social_connect.domain.request.ReqVerifyOtpDTO;
-import com.connect.social_connect.domain.response.ResAccountDTO;
 import com.connect.social_connect.domain.response.ResCreateUserDTO;
 import com.connect.social_connect.domain.response.ResLoginDTO;
 import com.connect.social_connect.domain.response.ResResendOtpDTO;
@@ -70,6 +69,11 @@ public class AuthController {
         // Check if email already exists
         if (userService.isEmailExist(registerDTO.getEmail())) {
             throw new IdInvalidException("Email đã tồn tại");
+        }
+
+        // Check if username already exists
+        if (userService.isUsernameExist(registerDTO.getUsername())) {
+            throw new IdInvalidException("Username đã tồn tại");
         }
 
         // Create new user with isEmailVerified = false and authProvider = LOCAL
@@ -327,24 +331,5 @@ public class AuthController {
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
         return ResponseEntity.ok(null);
-    }
-
-    @GetMapping("/account")
-    @ApiMessage("Lấy thông tin tài khoản thành công")
-    public ResponseEntity<ResAccountDTO> getAccount() throws IdInvalidException {
-        // Get current user from SecurityContext
-        String email = SecurityUtil.getCurrentUserLogin()
-                .orElseThrow(() -> new IdInvalidException("Không tìm thấy người dùng"));
-
-        // Get user from database
-        User currentUser = userService.handleGetUserByUsername(email);
-        if (currentUser == null) {
-            throw new IdInvalidException("Không tìm thấy người dùng");
-        }
-
-        // Convert to response DTO (excludes password and refresh token)
-        ResAccountDTO response = userService.convertToResAccountDTO(currentUser);
-
-        return ResponseEntity.ok(response);
     }
 }

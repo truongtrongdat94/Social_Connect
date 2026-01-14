@@ -57,6 +57,11 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    //Check if username already exists
+    public boolean isUsernameExist(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
      //Convert User entity to ResCreateUserDTO
     public ResCreateUserDTO convertToResCreateUserDTO(User user) {
         ResCreateUserDTO dto = new ResCreateUserDTO();
@@ -149,20 +154,9 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    /**
-     * Generate unique username from email.
-     * If base username exists, append number suffix.
-     */
     private String generateUniqueUsername(String email) {
         String baseUsername = email.split("@")[0].toLowerCase().replaceAll("[^a-z0-9]", "");
         String username = baseUsername;
-        int suffix = 1;
-
-        while (userRepository.existsByUsername(username)) {
-            username = baseUsername + suffix;
-            suffix++;
-        }
-
         return username;
     }
 }
