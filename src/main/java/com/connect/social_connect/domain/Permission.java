@@ -6,22 +6,30 @@ import java.util.List;
 import com.connect.social_connect.util.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "permissions")
+@Table(name = "permissions", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "apiPath", "method" })
+}, indexes = {
+        @Index(name = "idx_permission_module", columnList = "module"),
+        @Index(name = "idx_permission_api", columnList = "apiPath, method")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,6 +40,7 @@ public class Permission {
 
     // Basic fields
     @NotBlank(message = "name không được để trống")
+    @Column(unique = true)
     private String name;
 
     @NotBlank(message = "apiPath không được để trống")

@@ -19,12 +19,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import com.connect.social_connect.util.SecurityUtil;
+import jakarta.persistence.Index;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "messages")
+@Table(name = "messages", indexes = {
+        @Index(name = "idx_message_chat_id", columnList = "chat_id"),
+        @Index(name = "idx_message_sender_id", columnList = "sender_id"),
+        @Index(name = "idx_message_created_at", columnList = "createdAt")
+})
 @Getter
 @Setter
 public class Message {
@@ -36,11 +44,18 @@ public class Message {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @NotNull(message = "type không được để trống")
     @Enumerated(EnumType.STRING)
     private MessageTypeEnum type = MessageTypeEnum.TEXT;
 
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
+
     // Audit fields
     private Instant createdAt;
+    private Instant updatedAt;
+    private String updatedBy;
 
     // Relationships
     @ManyToOne
@@ -63,5 +78,11 @@ public class Message {
     @PrePersist
     public void handleBeforeCreate() {
         this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse("");
+        this.updatedAt = Instant.now();
     }
 }

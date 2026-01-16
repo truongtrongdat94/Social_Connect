@@ -2,6 +2,7 @@ package com.connect.social_connect.domain;
 
 import java.time.Instant;
 
+import com.connect.social_connect.util.constant.NotificationReferenceTypeEnum;
 import com.connect.social_connect.util.constant.NotificationTypeEnum;
 
 import jakarta.persistence.Column;
@@ -14,12 +15,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "notifications")
+@Table(name = "notifications", indexes = {
+        @Index(name = "idx_notification_user_id", columnList = "user_id"),
+        @Index(name = "idx_notification_is_read", columnList = "isRead"),
+        @Index(name = "idx_notification_created_at", columnList = "createdAt")
+})
 @Getter
 @Setter
 public class Notification {
@@ -28,6 +35,7 @@ public class Notification {
     private Long id;
 
     // Basic fields
+    @NotNull(message = "type không được để trống")
     @Enumerated(EnumType.STRING)
     private NotificationTypeEnum type;
 
@@ -35,8 +43,16 @@ public class Notification {
     private String content;
 
     private Long referenceId;
-    private String referenceType;
+
+    @NotNull(message = "referenceType không được để trống")
+    @Enumerated(EnumType.STRING)
+    private NotificationReferenceTypeEnum referenceType;
+
     private Boolean isRead = false;
+
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
 
     // Audit fields
     private Instant createdAt;

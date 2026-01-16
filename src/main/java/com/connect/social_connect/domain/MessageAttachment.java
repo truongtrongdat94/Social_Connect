@@ -10,16 +10,20 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "message_attachments")
+@Table(name = "message_attachments", indexes = {
+        @Index(name = "idx_message_attachment_message", columnList = "message_id")
+})
 @Getter
 @Setter
 public class MessageAttachment {
@@ -38,10 +42,15 @@ public class MessageAttachment {
     private Long fileSize;
     private String thumbnailUrl;
 
+    @NotNull(message = "type không được để trống")
     @Enumerated(EnumType.STRING)
     private AttachmentTypeEnum type;
 
     private Integer displayOrder;
+
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
 
     // Audit fields
     private Instant createdAt;

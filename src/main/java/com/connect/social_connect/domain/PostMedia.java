@@ -10,13 +10,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "post_media")
+@Table(name = "post_media", indexes = {
+        @Index(name = "idx_post_media_post", columnList = "post_id")
+})
 @Getter
 @Setter
 public class PostMedia {
@@ -28,8 +32,15 @@ public class PostMedia {
     @NotBlank(message = "mediaUrl không được để trống")
     private String mediaUrl;
 
+    @NotNull(message = "mediaType không được để trống")
     @Enumerated(EnumType.STRING)
     private MediaTypeEnum mediaType;
+
+    private Integer displayOrder = 0;
+
+    // Soft delete
+    private Boolean isDeleted = false;
+    private java.time.Instant deletedAt;
 
     // Relationships
     @ManyToOne

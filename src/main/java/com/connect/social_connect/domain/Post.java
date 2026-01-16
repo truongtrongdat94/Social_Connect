@@ -20,12 +20,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import com.connect.social_connect.util.SecurityUtil;
+import jakarta.persistence.Index;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "posts", indexes = {
+        @Index(name = "idx_post_user_id", columnList = "user_id"),
+        @Index(name = "idx_post_created_at", columnList = "createdAt")
+})
 @Getter
 @Setter
 public class Post {
@@ -37,14 +44,22 @@ public class Post {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @NotNull(message = "type không được để trống")
     @Enumerated(EnumType.STRING)
     private PostTypeEnum type = PostTypeEnum.TEXT;
 
+    @NotNull(message = "privacy không được để trống")
     @Enumerated(EnumType.STRING)
     private PrivacyEnum privacy = PrivacyEnum.PUBLIC;
 
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
+
     // Audit fields
     private Instant createdAt;
+    private Instant updatedAt;
+    private String updatedBy;
 
     // Relationships
     @ManyToOne
@@ -67,5 +82,11 @@ public class Post {
     @PrePersist
     public void handleBeforeCreate() {
         this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse("");
+        this.updatedAt = Instant.now();
     }
 }

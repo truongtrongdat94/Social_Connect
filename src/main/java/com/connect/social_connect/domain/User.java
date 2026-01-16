@@ -18,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -26,7 +28,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_username", columnList = "username"),
+        @Index(name = "idx_user_email", columnList = "email")
+})
 @Getter
 @Setter
 public class User {
@@ -52,14 +57,19 @@ public class User {
     private String avatarUrl;
     private String coverUrl;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(length = 2000)
     private String refreshToken;
 
+    @NotNull(message = "authProvider không được để trống")
     @Enumerated(EnumType.STRING)
     private AuthProviderEnum authProvider;
 
     @Column(nullable = false)
     private Boolean isEmailVerified = false;
+
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
 
     // Audit fields
     private Instant createdAt;

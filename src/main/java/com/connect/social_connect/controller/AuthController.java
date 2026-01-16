@@ -197,8 +197,10 @@ public class AuthController {
             throw new IdInvalidException("Email hoặc mật khẩu không đúng");
         }
 
-        // Check if user is a Google-only user (authProvider = GOOGLE and no password set)
-        // Requirement 5.3: Return error if user has authProvider = GOOGLE and passwordHash = null
+        // Check if user is a Google-only user (authProvider = GOOGLE and no password
+        // set)
+        // Requirement 5.3: Return error if user has authProvider = GOOGLE and
+        // passwordHash = null
         if (currentUser.getAuthProvider() == AuthProviderEnum.GOOGLE
                 && (currentUser.getPasswordHash() == null || currentUser.getPasswordHash().isEmpty())) {
             throw new IdInvalidException("Tài khoản này được đăng ký qua Google. Vui lòng đăng nhập bằng Google.");
@@ -238,6 +240,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(authService.getRefreshTokenExpiration())
                 .build();
@@ -246,7 +249,7 @@ public class AuthController {
         return ResponseEntity.ok(resLoginDTO);
     }
 
-    @GetMapping("/refresh")
+    @PostMapping("/refresh")
     @ApiMessage("Làm mới token thành công")
     public ResponseEntity<ResLoginDTO> refreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "") String refreshToken,
@@ -288,6 +291,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", newRefreshToken)
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(authService.getRefreshTokenExpiration())
                 .build();
@@ -325,11 +329,12 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(0)
                 .build();
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        return ResponseEntity.ok(null);
+        return ResponseEntity.noContent().build();
     }
 }

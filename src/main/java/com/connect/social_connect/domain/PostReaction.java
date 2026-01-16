@@ -12,15 +12,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "post_reactions", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "user_id", "post_id" })
+}, indexes = {
+        @Index(name = "idx_post_reaction_post", columnList = "post_id")
 })
 @Getter
 @Setter
@@ -30,6 +34,7 @@ public class PostReaction {
     private Long id;
 
     // Basic fields
+    @NotNull(message = "type không được để trống")
     @Enumerated(EnumType.STRING)
     private ReactionTypeEnum type;
 

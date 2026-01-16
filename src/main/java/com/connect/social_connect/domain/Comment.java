@@ -16,13 +16,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import com.connect.social_connect.util.SecurityUtil;
+import jakarta.persistence.Index;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "comments")
+@Table(name = "comments", indexes = {
+        @Index(name = "idx_comment_post_id", columnList = "post_id"),
+        @Index(name = "idx_comment_user_id", columnList = "user_id"),
+        @Index(name = "idx_comment_parent_id", columnList = "parent_id")
+})
 @Getter
 @Setter
 public class Comment {
@@ -35,8 +42,14 @@ public class Comment {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
+
     // Audit fields
     private Instant createdAt;
+    private Instant updatedAt;
+    private String updatedBy;
 
     // Relationships
     @ManyToOne
@@ -63,5 +76,11 @@ public class Comment {
     @PrePersist
     public void handleBeforeCreate() {
         this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().orElse("");
+        this.updatedAt = Instant.now();
     }
 }

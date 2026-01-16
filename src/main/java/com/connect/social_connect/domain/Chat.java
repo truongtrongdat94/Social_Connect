@@ -15,12 +15,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "chats")
+@Table(name = "chats", indexes = {
+        @Index(name = "idx_chat_name", columnList = "name"),
+        @Index(name = "idx_chat_created_at", columnList = "createdAt")
+})
 @Getter
 @Setter
 public class Chat {
@@ -33,6 +37,10 @@ public class Chat {
     private Boolean isGroup = false;
     private String avatarUrl;
     private Instant lastMessageAt;
+
+    // Soft delete
+    private Boolean isDeleted = false;
+    private Instant deletedAt;
 
     // Audit fields
     private Instant createdAt;

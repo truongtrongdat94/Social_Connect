@@ -40,7 +40,7 @@ public class AuthService {
         this.jwtEncoder = jwtEncoder;
     }
 
-     //Create access token
+    // Create access token
     public String createAccessToken(String email, ResLoginDTO dto) {
         Instant now = Instant.now();
         Instant validity = now.plus(accessTokenExpiration, ChronoUnit.SECONDS);
@@ -59,7 +59,7 @@ public class AuthService {
         return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
     }
 
-     //Create refresh token
+    // Create refresh token
     public String createRefreshToken(String email, ResLoginDTO dto) {
         Instant now = Instant.now();
         Instant validity = now.plus(refreshTokenExpiration, ChronoUnit.SECONDS);
@@ -78,7 +78,7 @@ public class AuthService {
         return jwtEncoder.encode(jwtEncoderParameters).getTokenValue();
     }
 
-     //Validate and decode refresh token
+    // Validate and decode refresh token
     public Jwt checkValidRefreshToken(String token) {
         try {
             SecretKey secretKey = getSecretKey();
@@ -91,18 +91,18 @@ public class AuthService {
         }
     }
 
-     //Get secret key from base64 encoded string
+    // Get secret key from base64 encoded string
     private SecretKey getSecretKey() {
         byte[] keyBytes = Base64.from(jwtKey).decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, JWT_ALGORITHM.getName());
     }
 
-    //Get access token expiration
+    // Get access token expiration
     public long getAccessTokenExpiration() {
         return accessTokenExpiration;
     }
 
-     //Get refresh token expiration
+    // Get refresh token expiration
     public long getRefreshTokenExpiration() {
         return refreshTokenExpiration;
     }
